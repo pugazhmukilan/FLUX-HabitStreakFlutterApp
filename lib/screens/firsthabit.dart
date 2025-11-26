@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:track/bloc/habit_bloc.dart';
+import 'package:track/screens/home.dart';
 import 'package:track/theme/colors.dart';
 import 'package:track/widgets/nextbutton.dart';
 
@@ -39,9 +42,13 @@ class _FirstHabitState extends State<FirstHabit> {
             Text("What is the first habit you want to track?",style: TextStyle(fontFamily:"schibstedGrotesk",fontSize: 12,color: Colors.grey),),
             SizedBox(height:30),
             TextField(
+              
+              cursorColor:AppColors.greenprimary,  
               controller: firsthabit,
               
               decoration: InputDecoration(
+                fillColor: AppColors.green1.withOpacity(0.6),
+
                 focusColor: AppColors.green2.withOpacity(0.2),
                 hintText: "Eg: Drink Water",
                 hintStyle: TextStyle(fontFamily:"schibstedGrotesk",fontSize: 14,color: Colors.grey.withOpacity(0.5)),
@@ -77,8 +84,12 @@ class _FirstHabitState extends State<FirstHabit> {
 
               validateField();
               if(!showError){
+                context.read<HabitBloc>().add(AddHabit(firsthabit.text.trim()));
                 // Proceed to next step
-              }
+                Navigator.pushAndRemoveUntil(context,
+                            MaterialPageRoute(builder: (context) => Home()),
+                            (route) => false);
+                          }
             })),
             SizedBox(height:20,)
         

@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:track/bloc/habit_bloc.dart';
+import 'package:track/bloc/theme_bloc.dart';
+import 'package:track/local_storage_repository.dart';
 import 'package:track/screens/welcome.dart';
 import 'package:track/theme/colors.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalStorageRepository().init();
+  runApp(
+    MultiBlocProvider(
+      providers: [BlocProvider(create: (_) => ThemeBloc()),
+                  BlocProvider(create: (_)=> HabitBloc())],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -12,13 +24,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: AppTheme.lightTheme,
-      
-      home: welcomePage(),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, state) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flutter Demo',
+          theme: state is ThemeDark ? AppTheme.darkTheme : AppTheme.lightTheme,
+
+          home: welcomePage(),
+        );
+      },
     );
   }
 }
-

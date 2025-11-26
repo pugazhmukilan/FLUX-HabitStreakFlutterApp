@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageRepository {
   static late SharedPreferences _prefs;
 
   Future<void> init() async {
+    WidgetsFlutterBinding.ensureInitialized();
     _prefs = await SharedPreferences.getInstance();
   }
 
@@ -15,9 +17,9 @@ class LocalStorageRepository {
 
   static Future<void> remove(String key) async => await _prefs.remove(key);
   
-  static Future<String?> getToken() async => _prefs.getString('token');
-  static Future<void> setToken(String token) async => await _prefs.setString('token', token);
-  static Future<void> removeToken() async => await _prefs.remove('token');
+  static Future<bool> getTheme() async => _prefs.getBool('theme')!;
+  static Future<void> setTheme(bool token) async => await _prefs.setBool('theme', token);
+ 
   
   // Cooking experience methods
 
