@@ -5,6 +5,10 @@
 <h1 align="center">FLUX - Habit Tracker</h1>
 
 <p align="center">
+  <img src="assets/poster.png" alt="FLUX App Poster"/>
+</p>
+
+<p align="center">
   A minimalist and beautiful habit tracking application built with Flutter to help you build and maintain positive habits.
 </p>
 
@@ -17,6 +21,12 @@
 
 ---
 
+## 🌟 About The Project
+
+FLUX isn't just another habit tracker; it's a visual journey of your commitment. Built with a clean, minimalist aesthetic, FLUX helps you focus on what truly matters: building consistent, positive habits. With a satisfying GitHub-style heatmap, you can watch your progress grow day by day, turning small efforts into a powerful streak of success.
+
+Whether you prefer a bright, clean interface or a sleek dark mode, FLUX adapts to your style. Every interaction is designed to be simple and intuitive, from adding a new habit to marking it complete with a single tap. Stop managing lists and start building a better you, one day at a time.
+
 ## ✨ Features
 
 - **Track Daily Habits**: Easily add, complete, and delete your daily habits.
@@ -27,11 +37,32 @@
 
 ## 📸 Screenshots
 
-*(Replace these with actual screenshots of your app)*
-
-| Light Mode | Dark Mode |
-| :---: | :---: |
-| <img src="assets/fluxlogo.png" alt="Light Mode Screenshot" width="250"/> | <img src="assets/fluxlogo.png" alt="Dark Mode Screenshot" width="250"/> |
+<table align="center">
+  <tr>
+    <td align="center"><strong>Welcome Page (Light)</strong></td>
+    <td align="center"><strong>Welcome Page (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/mockimages/light welcome page.png" alt="Light Welcome" width="250"/></td>
+    <td><img src="assets/mockimages/darkwelcome.png" alt="Dark Welcome" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Home Page (Light)</strong></td>
+    <td align="center"><strong>Home Page (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/mockimages/ligh homepage.png" alt="Light Home" width="250"/></td>
+    <td><img src="assets/mockimages/dark home page.png" alt="Dark Home" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>First Habit (Light)</strong></td>
+    <td align="center"><strong>First Habit (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/mockimages/light first habit.png" alt="Light First Habit" width="250"/></td>
+    <td><img src="assets/mockimages/dark first habit page.png" alt="Dark First Habit" width="250"/></td>
+  </tr>
+</table>
 
 ## 🛠️ Built With
 

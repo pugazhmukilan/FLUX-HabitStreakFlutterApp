@@ -81,4 +81,4 @@ flutter:
           weight: 500
   assets:
     - assets/
-      
+    - assets/mockimages
