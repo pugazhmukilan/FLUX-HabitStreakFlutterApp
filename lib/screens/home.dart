@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:track/Models/habithive.dart';
 import 'package:track/bloc/habit_bloc.dart';
 import 'package:track/bloc/theme_bloc.dart';
 import 'package:track/theme/colors.dart';
@@ -20,30 +20,9 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    // Fetch the initial data when the widget is first created
     context.read<HabitBloc>().add(GetHabit());
   }
-
-  List<ContributionEntry> _generateTestData() {
-    return [
-      ContributionEntry(DateTime(2025, 4, 23), 5),
-      ContributionEntry(DateTime(2025, 4, 24), 7),
-      ContributionEntry(DateTime(2025, 4, 25), 6),
-      ContributionEntry(DateTime(2025, 4, 29), 4),
-      ContributionEntry(DateTime(2025, 5, 3), 5),
-      ContributionEntry(DateTime(2025, 5, 5), 3),
-      ContributionEntry(DateTime(2025, 6, 11), 9),
-      ContributionEntry(DateTime(2025, 7, 28), 4),
-    ];
-  }
-
-  // List<String> habits = [
-  //   "Drink Water",
-  //   "Exercise",
-  //   "Read Books",
-  //   "Meditate",
-  //   "Sleep Early",
-  //   "somthing",
-  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +33,6 @@ class _HomeState extends State<Home> {
           padding: const EdgeInsets.only(left: 16),
           child: Image.asset("assets/fluxlogo.png", height: 28),
         ),
-
         title: Text(
           "FLUX",
           style: TextStyle(
@@ -66,9 +44,8 @@ class _HomeState extends State<Home> {
                 : AppColors.greylight,
           ),
         ),
-
         actions: [
-          // THEME SWITCH
+          // THEME SWITCH (This is a separate Bloc, so it's fine here)
           BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               return Switch(
@@ -82,168 +59,285 @@ class _HomeState extends State<Home> {
               );
             },
           ),
-
           // HAMBURGER MENU ICON
-          IconButton(
-            icon: const Icon(Icons.menu_rounded),
-            color: Theme.of(context).brightness == Brightness.light
-                ? AppColors.greydark
-                : AppColors.greylight,
-            onPressed: () {
-              print("Menu clicked");
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.menu_rounded),
+          //   color: Theme.of(context).brightness == Brightness.light
+          //       ? AppColors.greydark
+          //       : AppColors.greylight,
+          //   onPressed: () {
+          //     print("Menu clicked");
+          //   },
+          // ),
         ],
       ),
-
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SingleChildScrollView(
-            reverse: true,
-            scrollDirection: Axis.horizontal,
-            child: ContributionHeatmap(
-              minDate: DateTime(
-                DateTime.now().year - 1,
-                DateTime.now().month,
-                DateTime.now().day,
+      // Use one BlocBuilder to control the entire body
+      body: BlocBuilder<HabitBloc, HabitState>(
+        builder: (context, state) {
+          // Show a loading indicator while data is being fetched
+          if (state is HabitInitial) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: AppColors.greenprimary,
               ),
-              maxDate: DateTime.now(),
+            );
+          }
 
-              heatmapColor: HeatmapColor.green,
-              showMonthLabels: true,
-              showWeekdayLabels: false,
-              showCellDate: true,
-              cellSize: 24,
-              splittedMonthView: true,
-              startWeekday: DateTime.monday,
-              monthTextStyle: TextStyle(
-                fontFamily: "schibstedGrotesk",
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.greylight
-                    : AppColors.greydark,
-              ),
-              cellDateTextStyle: TextStyle(
-                fontFamily: "schibstedGrotesk",
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.green1
-                    : AppColors.greydark,
-              ),
-              entries: _generateTestData(),
+          // Once loaded, extract the data. Provide empty defaults for safety.
+          final habits = (state is HabitLoaded) ? state.habits : <String, Habit>{};
+          final heatmapEntries = (state is HabitLoaded) ? state.heatmapEntries : <ContributionEntry>[];
+          final habitEntries = habits.entries.toList();
 
-              onCellTap: (date, value) {
-                print("Tapped $date → $value");
-              },
-            ),
-          ),
-          SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Your Habits 🔥",
-                  style: TextStyle(
+          // Build the main UI with the data from the state
+          if(state  is HabitLoaded){
+            return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- 1. HEATMAP ---
+              SingleChildScrollView(
+                reverse: true,
+                scrollDirection: Axis.horizontal,
+                child: ContributionHeatmap(
+                  minDate: DateTime(DateTime.now().year - 1, DateTime.now().month, DateTime.now().day),
+                  maxDate: DateTime.now(),
+                  heatmapColor: HeatmapColor.green,
+                  showMonthLabels: true,
+                  showWeekdayLabels: false,
+                  showCellDate: true,
+                  cellSize: 24,
+                  splittedMonthView: true,
+                  startWeekday: DateTime.monday,
+                  monthTextStyle: TextStyle(
                     fontFamily: "schibstedGrotesk",
-                    fontSize: 20,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.greylight
+                        : AppColors.greydark,
                   ),
-                ),
-                NewHabitButton(
-                  Context: context,
-                  onTap: () {
-                    print("pressed the new habit");
-                    showtextbox(
-                      context: context,
-                      onAdd: (newHabit) {
-                        // This adds the habit to your list and rebuilds the screen
-                       context.read<HabitBloc>().add(AddHabit(newHabit));
-                      },
-                    );
+                  cellDateTextStyle: TextStyle(
+                    fontFamily: "schibstedGrotesk",
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.green1
+                        : AppColors.greydark,
+                  ),
+                  entries: heatmapEntries, // Use data from the state
+                  onCellTap: (date, value) {
+                    print("Tapped $date → $value");
                   },
                 ),
-              ],
-            ),
-          ),
+              ),
+              SizedBox(height: 16),
 
-          SizedBox(height: 8),
-
-          Expanded(
-            child: BlocBuilder<HabitBloc, HabitState>(
-              builder: (context, state) {
-                if (state is HabitInitial) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.greenprimary,
+              // --- 2. HABITS HEADER ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Your Habits 🔥",
+                      style: TextStyle(
+                        fontFamily: "schibstedGrotesk",
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  );
-                }
-                if (state is HabitChanged) {
-                  if (state.habits.isEmpty) {
-                    return Center(child: Text("No Habits Found. Add a new one!"));
-                  }
-                  // Get a list of the map entries (key-value pairs)
-                  final habitEntries = state.habits.entries.toList();
+                    NewHabitButton(
+                      Context: context,
+                      onTap: () {
+                        showtextbox(
+                          context: context,
+                          onAdd: (newHabit) {
+                            context.read<HabitBloc>().add(AddHabit(newHabit));
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
 
-                  return ListView.builder(
-                    itemCount: habitEntries.length,
-                    itemBuilder: (context, index) {
-                      final habitEntry = habitEntries[index];
-                      final habitName = habitEntry.key;
-                      // The value is now a Habit object, not a bool
-                      final habitData = habitEntry.value;
-                      final isDone = habitData.isDone;
+              // --- 3. HABITS LIST ---
+              Expanded(
+                child: habitEntries.isEmpty
+                    ? Center(child: Text("No Habits Found. Add a new one!"))
+                    : ListView.builder(
+                        itemCount: habitEntries.length,
+                        itemBuilder: (context, index) {
+                          final habitEntry = habitEntries[index];
+                          final habitName = habitEntry.key;
+                          final habitData = habitEntry.value as Habit;
+                          final isDone = habitData.isDone;
 
-                      return ListTile(
-                        // Disable the tile if the habit is already marked as done
-                        enabled: !isDone,
-                        title: Text(
-                          habitName,
-                          style: TextStyle(
-                            fontFamily: "schibstedGrotesk",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            // Add a strikethrough and change color if done
-                            decoration: isDone
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                            color: isDone
-                                ? Colors.grey
-                                : null,
-                          ),
-                        ),
-                        // Change the trailing icon based on completion status
-                        trailing: isDone
-                            ? Text('🔥', style: TextStyle(fontSize: 24))
-                            : Icon(Icons.check_box_outline_blank),
-                        onTap: () {
-                          // You can now toggle even if it's already done,
-                          // to allow un-doing a mistake.
-                          context.read<HabitBloc>().add(ToggleHabit(habitName));
+                          return ListTile(
+                            enabled: !isDone,
+                            title: Text(
+                              habitName,
+                              style: TextStyle(
+                                fontFamily: "schibstedGrotesk",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                decoration: isDone ? TextDecoration.lineThrough : TextDecoration.none,
+                                color: isDone ? Colors.grey : null,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                isDone
+                                    ? Text('🔥', style: TextStyle(fontSize: 24))
+                                    : Icon(Icons.check_box_outline_blank),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.redAccent),
+                                  onPressed: () {
+                                    context.read<HabitBloc>().add(DeleteHabit(habitName));
+                                  },
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              context.read<HabitBloc>().add(ToggleHabit(habitName));
+                            },
+                          );
                         },
-                      );
-                    },
-                  );
-                }
-                return Center(child: Text("No Habits Found. Add a new one!"));
-              },
-            ),
-          ),
-        ],
+                      ),
+              ),
+            ],
+          );
+          }
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- 1. HEATMAP ---
+              SingleChildScrollView(
+                reverse: true,
+                scrollDirection: Axis.horizontal,
+                child: ContributionHeatmap(
+                  minDate: DateTime(DateTime.now().year - 1, DateTime.now().month, DateTime.now().day),
+                  maxDate: DateTime.now(),
+                  heatmapColor: HeatmapColor.green,
+                  showMonthLabels: true,
+                  showWeekdayLabels: false,
+                  showCellDate: true,
+                  cellSize: 24,
+                  splittedMonthView: true,
+                  startWeekday: DateTime.monday,
+                  monthTextStyle: TextStyle(
+                    fontFamily: "schibstedGrotesk",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.greylight
+                        : AppColors.greydark,
+                  ),
+                  cellDateTextStyle: TextStyle(
+                    fontFamily: "schibstedGrotesk",
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.green1
+                        : AppColors.greydark,
+                  ),
+                  entries: heatmapEntries, // Use data from the state
+                  onCellTap: (date, value) {
+                    print("Tapped $date → $value");
+                  },
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // --- 2. HABITS HEADER ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Your Habits 🔥",
+                      style: TextStyle(
+                        fontFamily: "schibstedGrotesk",
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    NewHabitButton(
+                      Context: context,
+                      onTap: () {
+                        showtextbox(
+                          context: context,
+                          onAdd: (newHabit) {
+                            context.read<HabitBloc>().add(AddHabit(newHabit));
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
+
+              // --- 3. HABITS LIST ---
+              Expanded(
+                child: habitEntries.isEmpty
+                    ? Center(child: Text("No Habits Found. Add a new one!"))
+                    : ListView.builder(
+                        itemCount: habitEntries.length,
+                        itemBuilder: (context, index) {
+                          final habitEntry = habitEntries[index];
+                          final habitName = habitEntry.key;
+                          final habitData = habitEntry.value as Habit;
+                          final isDone = habitData.isDone;
+
+                          return ListTile(
+                            enabled: !isDone,
+                            title: Text(
+                              habitName,
+                              style: TextStyle(
+                                fontFamily: "schibstedGrotesk",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                decoration: isDone ? TextDecoration.lineThrough : TextDecoration.none,
+                                color: isDone ? Colors.grey : null,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                isDone
+                                    ? Text('🔥', style: TextStyle(fontSize: 24))
+                                    : Icon(Icons.check_box_outline_blank),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.redAccent),
+                                  onPressed: () {
+                                    context.read<HabitBloc>().add(DeleteHabit(habitName));
+                                  },
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              context.read<HabitBloc>().add(ToggleHabit(habitName));
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-
-
+// This function remains unchanged as it is independent of the widget's state
 void showtextbox({
   required BuildContext context,
   required Function(String) onAdd,
@@ -252,13 +346,11 @@ void showtextbox({
 
   showModalBottomSheet(
     context: context,
-    isScrollControlled:
-        true, // Important: makes the sheet move with the keyboard
+    isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (BuildContext context) {
-      // This Padding adjusts for the keyboard
       return Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -286,10 +378,14 @@ void showtextbox({
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
-                focusColor: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.greylight
-                    : AppColors.greydark,
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: AppColors.greenprimary,
+                    width: 2.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
                     color: Theme.of(context).brightness == Brightness.dark
@@ -305,14 +401,6 @@ void showtextbox({
                       : AppColors.greydark.withOpacity(0.5),
                 ),
                 hintText: 'e.g., Read for 15 minutes',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.greylight
-                        : AppColors.greydark,
-                  ),
-                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -334,9 +422,9 @@ void showtextbox({
                 ElevatedButton(
                   onPressed: () {
                     if (controller.text.isNotEmpty) {
-                      onAdd(controller.text); // Send the new habit back
+                      onAdd(controller.text);
                     }
-                    Navigator.pop(context); // Close the bottom sheet
+                    Navigator.pop(context);
                   },
                   child: const Text('Add'),
                 ),

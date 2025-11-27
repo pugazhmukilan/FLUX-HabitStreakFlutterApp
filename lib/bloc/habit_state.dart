@@ -9,3 +9,16 @@ final class HabitChanged extends HabitState {
 
   HabitChanged(this.habits);
 }
+
+final class updateheatmap extends HabitState {
+  final List<ContributionEntry> dataset;
+
+  updateheatmap(this.dataset);
+}
+
+class HabitLoaded extends HabitState {
+  final Map<String, Habit> habits;
+  final List<ContributionEntry> heatmapEntries;
+
+  HabitLoaded({required this.habits, required this.heatmapEntries});
+}

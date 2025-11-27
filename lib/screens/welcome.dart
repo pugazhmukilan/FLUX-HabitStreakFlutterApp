@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:track/local_storage_repository.dart';
 import 'package:track/screens/firsthabit.dart';
 import 'package:track/theme/colors.dart';
 import 'package:track/widgets/nextbutton.dart';
@@ -57,30 +58,7 @@ class _welcomePageState extends State<welcomePage> {
             
           children: [
             SizedBox(height: 60,),
-            // Padding(
-            //   padding: EdgeInsets.only(left: 20),
-            //   child: Text("GO FOR", style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold)),
-            // ),
-            // Padding(
-            //   padding: EdgeInsets.only(left: 20),
-            //   child: Text("BETTER", style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: AppColors.greenprimary)),
-            // ),
-            // Padding(
-            //   padding: EdgeInsets.only(left: 20),
-            //   child: Text("HABITS", style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: AppColors.greenprimary)),
-            // ),
-            // Padding(
-            //   padding: EdgeInsets.only(left: 20),
-            //   child: Text("WITH", style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold)),
-            // ),
-            // Padding(
-            //   padding: EdgeInsets.only(left: 20),
-            //   child: Text("FLUX", style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold)),
-            // ),
-            // Padding(
-            //   padding: EdgeInsets.only(left: 20),
-            //   child: Image(image: AssetImage("assets/underline.png"), width: 150),
-            // ),
+            
             Padding(
               padding: const EdgeInsets.only(left:10),
               child: Image(image: Theme.of(context).brightness ==Brightness.light ?    AssetImage("assets/welcomelight.png"):AssetImage("assets/welcomedark.png"), width: 300),
@@ -88,11 +66,14 @@ class _welcomePageState extends State<welcomePage> {
             Spacer(),
           
             Center(child: NextButton(pressed:(){
+
+              LocalStorageRepository.setBool("newuser",false).then((value) {
               Navigator.push(context, 
-              MaterialPageRoute(builder: (context)=>FirstHabit()));})
-              ),
-          
-          
+              MaterialPageRoute(builder: (context)=>FirstHabit()));
+              
+  }
+              );
+              })),
             SizedBox(height: 30)
           ],
                   ),
